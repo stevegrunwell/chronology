@@ -21,6 +21,7 @@ define( 'CHRONOLOGY_VERSION', '0.1.0' );
 // Load plugin dependencies.
 require_once __DIR__ . '/inc/admin.php';
 require_once __DIR__ . '/inc/class-queue.php';
+require_once __DIR__ . '/inc/core.php';
 
 /**
  * Load the plugin textdomain.
