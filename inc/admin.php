@@ -11,6 +11,32 @@ namespace Chronology\Admin;
 use Chronology;
 
 /**
+ * Enqueue assets used in the admin area.
+ */
+function enqueue_assets() {
+	wp_register_script(
+		'chronology-admin',
+		plugins_url( 'assets/js/admin.min.js', __DIR__ ),
+		array( 'jquery' ),
+		CHRONOLOGY_VERSION,
+		true
+	);
+
+	wp_register_style(
+		'chronology-admin',
+		plugins_url( 'assets/css/admin.min.css', __DIR__ ),
+		null,
+		CHRONOLOGY_VERSION
+	);
+
+	if ( 'post' === get_current_screen()->base ) {
+		wp_enqueue_script( 'chronology-admin' );
+		wp_enqueue_style( 'chronology-admin' );
+	}
+}
+add_action( 'admin_enqueue_scripts', __NAMESPACE__ . '\enqueue_assets' );
+
+/**
  * Register the post meta box for supported post types.
  */
 function add_meta_boxes() {
@@ -57,6 +83,8 @@ function meta_box_callback( $post ) {
 		</tbody>
 	</table>
 
+	<button class="button chronology-add-event"><?php esc_html_e( 'Add Event', 'chronology' ); ?></button>
+
 <?php
 
 	wp_nonce_field( 'chronology-edit', '_chronology_nonce' );
@@ -83,7 +111,7 @@ function build_meta_table_row( $queue, $args ) {
 	) );
 ?>
 
-	<tr>
+	<tr id="chronology-row-<?php echo esc_attr( $args['guid'] ); ?>">
 		<td>
 			<label for="chronology-timestamp-<?php echo esc_attr( $args['guid'] ); ?>" class="screen-reader-text">
 				<?php echo esc_html( _x( 'Date', 'schedule item date/time', 'chronology' ) ); ?>

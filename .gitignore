@@ -1,3 +1,6 @@
+assets/*/*.map
+assets/css/*.css
+assets/js/*.js
 dist
 node_modules
 vendor
