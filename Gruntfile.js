@@ -12,7 +12,10 @@ module.exports = function(grunt) {
       },
 			admin: {
 				files: {
-					'assets/js/admin.min.js': ['assets/js/src/admin.js']
+					'assets/js/admin.min.js': [
+						'node_modules/jquery-ui-timepicker-addon/dist/jquery-ui-timepicker-addon.js',
+						'assets/js/src/admin.js'
+					]
 				}
 			}
 		},

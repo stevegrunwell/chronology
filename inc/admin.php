@@ -17,7 +17,7 @@ function enqueue_assets() {
 	wp_register_script(
 		'chronology-admin',
 		plugins_url( 'assets/js/admin.min.js', __DIR__ ),
-		array( 'jquery' ),
+		array( 'jquery', 'jquery-ui-datepicker', 'jquery-ui-slider' ),
 		CHRONOLOGY_VERSION,
 		true
 	);

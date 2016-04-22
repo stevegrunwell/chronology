@@ -1,16 +1,18 @@
 {
   "name": "chronology",
   "description": "Scheduling framework for WordPress.",
-  "dependencies": {},
   "devDependencies": {
     "grunt": "^0.4.5",
+    "grunt-autoprefixer": "~0.7.6",
+    "grunt-contrib-copy": "^1.0.0",
+    "grunt-contrib-cssmin": "~0.10.0",
     "grunt-contrib-jshint": "^1.0.0",
     "grunt-contrib-uglify": "^1.0.1",
     "grunt-sass": "^1.1.0",
-    "grunt-autoprefixer": "~0.7.6",
-    "grunt-contrib-cssmin": "~0.10.0",
-    "grunt-contrib-copy": "^1.0.0",
-    "grunt-wp-i18n": "^0.5.4"
+    "grunt-wp-i18n": "^0.5.4",
+    "jquery-ui": "^1.10.5",
+    "jquery-ui-timepicker-addon": "git+https://github.com/trentrichardson/jQuery-Timepicker-Addon.git",
+    "wp-jquery-ui-datepicker-skins": "git+https://github.com/stevegrunwell/wp-jquery-ui-datepicker-skins.git#feature/package-json"
   },
   "author": "Steve Grunwell",
   "license": "MIT"

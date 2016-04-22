@@ -4,6 +4,10 @@
  * @package Chronology
  */
 
+@import "../../../node_modules/jquery-ui/themes/smoothness/jquery-ui";
+@import "../../../node_modules/wp-jquery-ui-datepicker-skins/sass/datepicker";
+@import "../../../node_modules/jquery-ui-timepicker-addon/dist/jquery-ui-timepicker-addon";
+
 #chronology-row-_template {
 	display: none;
 }

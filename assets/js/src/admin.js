@@ -35,4 +35,14 @@
 	// Wire up event listeners.
 	metabox.on( 'click', '.chronology-add-event', addRow );
 
+	$( function () {
+
+
+		metabox.find('input[type="datetime"]').datetimepicker({
+			controlType: 'select',
+			oneLine: true,
+			timeFormat: 'hh:mm tt'
+		});
+	} );
+
 } ( jQuery, undefined ) );
