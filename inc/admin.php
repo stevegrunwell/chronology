@@ -69,7 +69,7 @@ function meta_box_callback( $post ) {
 		<thead>
 			<tr>
 				<th scope="col"><?php echo esc_html( _x( 'Date', 'table header', 'chronology' ) ); ?></th>
-				<th scope="col"><?php echo esc_html( _x( 'Action', 'table header', 'chronology' ) ); ?></th>
+				<th scope="col" colspan="2"><?php echo esc_html( _x( 'Action', 'table header', 'chronology' ) ); ?></th>
 			</tr>
 		</thead>
 		<tbody>
@@ -136,6 +136,11 @@ function build_meta_table_row( $queue, $args ) {
 
 				<?php endforeach; ?>
 			</select>
+		</td>
+		<td>
+			<button type="button" class="deletion hide-if-no-js">
+				<?php echo esc_html( _x( 'Delete', 'scheduled event action', 'chronology' ) ); ?>
+			</button>
 		</td>
 	</tr>
 

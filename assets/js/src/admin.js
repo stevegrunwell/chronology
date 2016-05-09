@@ -25,6 +25,14 @@
 			document.getElementById( 'chronology-date-' + id ).focus();
 		},
 
+		deleteRow = function ( e ) {
+			var row = $( this ).parents( 'tr' );
+
+			e.preventDefault();
+
+			row.fadeOut( 'fast' ).remove();
+		},
+
 		/**
 		 * Generate a unique ID to assign to newly-created rows.
 		 */
@@ -33,11 +41,11 @@
 		};
 
 	// Wire up event listeners.
-	metabox.on( 'click', '.chronology-add-event', addRow );
+	metabox
+		.on( 'click', '.chronology-add-event', addRow )
+		.on( 'click', '.deletion', deleteRow );
 
 	$( function () {
-
-
 		metabox.find('input[type="datetime"]').datetimepicker({
 			controlType: 'select',
 			oneLine: true,
