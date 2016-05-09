@@ -40,7 +40,44 @@ class QueueTest extends TestCase {
 	}
 
 	public function test_get_actions() {
-		$this->markTestIncomplete( 'Incomplete' );
+		$instance = new Queue( 123 );
+		$expected = array(
+			'my_action' => array(
+				'label'       => 'My Action',
+				'description' => 'It does stuff',
+			),
+		);
+
+		M::wpFunction( 'get_post_type', array(
+			'times'  => 1,
+			'args'   => array( 123 ),
+			'return' => 'post',
+		) );
+
+		M::onFilter( 'chronology_default_actions' )
+			->with( array(), 123 )
+			->reply( 'default_actions' );
+
+		M::onFilter( 'chronology_default_actions_post' )
+			->with( 'default_actions', 123 )
+			->reply( $expected );
+
+		$this->assertEquals( $expected, $instance->get_actions() );
+	}
+
+	public function test_get_actions_pulls_from_cache() {
+		$instance = new Queue( 123 );
+		$expected = array(
+			'my_action' => array(
+				'label'       => 'My Action',
+				'description' => 'It does stuff',
+			),
+		);
+		$property = new ReflectionProperty( $instance, 'actions' );
+		$property->setAccessible( true );
+		$property->setValue( $instance, $expected );
+
+		$this->assertEquals( $expected, $instance->get_actions() );
 	}
 
 	public function test_get_items() {
