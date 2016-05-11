@@ -9,6 +9,7 @@
 namespace Chronology;
 
 use Mockery;
+use ReflectionMethod;
 use ReflectionProperty;
 use WP_Mock as M;
 
@@ -119,6 +120,14 @@ class QueueTest extends TestCase {
 	}
 
 	public function test_save_items() {
+		$instance = Mockery::mock( __NAMESPACE__ . '\Queue', array( 123 ) )
+			->shouldAllowMockingProtectedMethods()
+			->makePartial();
+		$instance->shouldReceive( 'schedule_event' )
+			->once()
+			->with( '%TIMESTAMP%', '%ACTION%' )
+			->andReturn( true );
+
 		M::wpFunction( 'get_gmt_from_date', array(
 			'times'  => 1,
 			'args'   => array( 'TIMESTAMP', 'U' ),
@@ -141,7 +150,6 @@ class QueueTest extends TestCase {
 			) ),
 		) );
 
-		$instance = new Queue( 123 );
 		$instance->save_items( array(
 			array( 'timestamp' => 'TIMESTAMP', 'action' => 'ACTION' ),
 		) );
@@ -172,5 +180,114 @@ class QueueTest extends TestCase {
 		$instance->save_items( array(
 			array( 'timestamp' => '', 'action' => 'ACTION' ),
 		) );
+	}
+
+	public function test_save_items_dequeues_old_events() {
+		$instance = Mockery::mock( __NAMESPACE__ . '\Queue', array( 123 ) )
+			->shouldAllowMockingProtectedMethods()
+			->makePartial();
+		$instance->shouldReceive( 'get_items' )
+			->once()
+			->andReturn( array(
+				array(
+					'timestamp' => '%TIMESTAMP%',
+					'action'    => '%ACTION%',
+				),
+			) );
+		$instance->shouldReceive( 'unschedule_event' )
+			->once()
+			->with( '%TIMESTAMP%', '%ACTION%' )
+			->andReturn( true );
+
+		M::wpFunction( 'update_post_meta', array(
+			'times'  => 1,
+			'args'   => array( 123, Queue::QUEUE_META_KEY, array() ),
+		) );
+
+		$instance->save_items( array() );
+	}
+
+	public function test_schedule_event() {
+		$args = array( 'foo' => 'bar' );
+
+		$instance = Mockery::mock( __NAMESPACE__ . '\Queue', array( 123 ) )
+			->shouldAllowMockingProtectedMethods()
+			->makePartial();
+		$instance->shouldReceive( 'build_cron_args' )
+			->once()
+			->andReturn( $args );
+
+		$method = new ReflectionMethod( $instance, 'schedule_event' );
+		$method->setAccessible( true );
+
+		M::wpFunction( 'wp_schedule_single_event', array(
+			'times'  => 1,
+			'args'   => array( 'TIMESTAMP', 'ACTION', $args ),
+		) );
+
+		$this->assertTrue( $method->invoke( $instance, 'TIMESTAMP', 'ACTION' ) );
+	}
+
+	public function test_schedule_event_returns_false_on_error() {
+		$args = array( 'foo' => 'bar' );
+
+		$instance = Mockery::mock( __NAMESPACE__ . '\Queue', array( 123 ) )
+			->shouldAllowMockingProtectedMethods()
+			->makePartial();
+		$instance->shouldReceive( 'build_cron_args' )
+			->andReturn( $args );
+
+		$method = new ReflectionMethod( $instance, 'schedule_event' );
+		$method->setAccessible( true );
+
+		M::wpFunction( 'wp_schedule_single_event', array(
+			'times'  => 1,
+			'args'   => array( 'TIMESTAMP', 'ACTION', $args ),
+			'return' => false,
+		) );
+
+		$this->assertFalse( $method->invoke( $instance, 'TIMESTAMP', 'ACTION' ) );
+	}
+
+	public function test_unschedule_event() {
+		$args = array( 'foo' => 'bar' );
+
+		$instance = Mockery::mock( __NAMESPACE__ . '\Queue', array( 123 ) )
+			->shouldAllowMockingProtectedMethods()
+			->makePartial();
+		$instance->shouldReceive( 'build_cron_args' )
+			->once()
+			->andReturn( $args );
+
+		$method = new ReflectionMethod( $instance, 'unschedule_event' );
+		$method->setAccessible( true );
+
+		M::wpFunction( 'wp_unschedule_event', array(
+			'times'  => 1,
+			'args'   => array( 'TIMESTAMP', 'ACTION', $args ),
+		) );
+
+		$this->assertTrue( $method->invoke( $instance, 'TIMESTAMP', 'ACTION' ) );
+	}
+
+	public function test_unschedule_event_returns_false_on_error() {
+		$args = array( 'foo' => 'bar' );
+
+		$instance = Mockery::mock( __NAMESPACE__ . '\Queue', array( 123 ) )
+			->shouldAllowMockingProtectedMethods()
+			->makePartial();
+		$instance->shouldReceive( 'build_cron_args' )
+			->andReturn( $args );
+
+		$method = new ReflectionMethod( $instance, 'unschedule_event' );
+		$method->setAccessible( true );
+
+		M::wpFunction( 'wp_unschedule_event', array(
+			'times'  => 1,
+			'args'   => array( 'TIMESTAMP', 'ACTION', $args ),
+			'return' => false,
+		) );
+
+		$this->assertFalse( $method->invoke( $instance, 'TIMESTAMP', 'ACTION' ) );
 	}
 }

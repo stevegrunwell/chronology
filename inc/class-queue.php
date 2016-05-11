@@ -116,10 +116,11 @@ class Queue {
 	/**
 	 * Save items for this queue.
 	 *
-	 * @param array $items
+	 * @param array $items Events to be saved.
 	 */
 	public function save_items( $items ) {
-		$queue = array();
+		$current = $this->get_items();
+		$queue   = array();
 
 		foreach ( $items as $item ) {
 			if ( ! isset( $item['timestamp'], $item['action'] ) ) {
@@ -129,13 +130,60 @@ class Queue {
 				continue;
 			}
 
-			$queue[] = array(
+			$event = array(
 				'timestamp' => get_gmt_from_date( $item['timestamp'], 'U' ),
 				'action'    => sanitize_text_field( $item['action'] ),
 			);
+
+			// Scheduling the corresponding cron event.
+			$this->schedule_event( $event['timestamp'], $event['action'] );
+
+			$queue[] = $event;
+		}
+
+		// Remove events that are no longer present.
+		foreach ( array_diff( $current, $queue ) as $old_event ) {
+			$this->unschedule_event( $old_event['timestamp'], $old_event['action'] );
 		}
 
 		update_post_meta( $this->post_id, self::QUEUE_META_KEY, $queue );
 	}
 
+	/**
+	 * Build the $args array that will be used to schedule/unschedule events.
+	 *
+	 * @return array Arguments to be passed to the scheduled event callback and generally used to
+	 *               identify an event.
+	 */
+	protected function build_cron_args() {
+		return array(
+			'post_id' => $this->post_id,
+		);
+	}
+
+	/**
+	 * Schedule an event within WP-Cron.
+	 *
+	 * @param int    $timestamp The Unix timestamp of when the event should be executed.
+	 * @param string $action    The action to be executed when the event is run.
+	 * @return boolean True if the event was scheduled successfully, false otherwise.
+	 */
+	protected function schedule_event( $timestamp, $action ) {
+		$args = $this->build_cron_args();
+
+		return false === wp_schedule_single_event( $timestamp, $action, $args ) ? false : true;
+	}
+
+	/**
+	 * Schedule an event within WP-Cron.
+	 *
+	 * @param int    $timestamp The Unix timestamp of when the event should be executed.
+	 * @param string $action    The action to be executed when the event is run.
+	 * @return boolean True if the event was scheduled successfully, false otherwise.
+	 */
+	protected function unschedule_event( $timestamp, $action ) {
+		$args = $this->build_cron_args();
+
+		return false === wp_unschedule_event( $timestamp, $action, $args ) ? false : true;
+	}
 }
